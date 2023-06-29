@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: auth_app
+    volumes:
+      - .:/go/src/
+    ports:
+      - 3160:50051
+    depends_on:
+      - db
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    networks:
+      - cred_system_network
+
+  db:
+    build: .docker/postgres
+    container_name: auth_db
+    restart: always
+    tty: true
+    ports:
+      - 3161:5432
+    volumes:
+      - .docker/postgres/dbdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=authorizations
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=thisislocal-noneedtoworry
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    networks:
+      - cred_system_network
+
+networks:
+  cred_system_network:
+    driver: bridge
